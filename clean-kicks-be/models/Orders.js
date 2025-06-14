@@ -8,7 +8,7 @@ const OrderSchema = new mongoose.Schema({
     adminUsername: { type: String, required: true },
     orderType: { type: String, required: true },
     alamat: { type: String, required: true },
-    detailalamat: { type: String, required: true },
+    detailAlamat: { type: String, required: true },
     proses : [
         {
             namaProses : {type : String, required: true},

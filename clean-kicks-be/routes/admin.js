@@ -1,6 +1,6 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
-import { Admin } from '../models/Admin.js';
+import { Admin } from '../models/Admins.js';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
