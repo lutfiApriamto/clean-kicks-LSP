@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import { AdminRouter } from './routes/admin.js';
 import { ProductRouter } from './routes/products.js';
 import { OrderRouter } from './routes/Orders.js';
+import { ProfileRouter } from './routes/profile.js';
 
 dotenv.config();
 
@@ -26,12 +27,14 @@ app.use((req, res, next) => {
 // Routers
 app.use('/admin', AdminRouter);
 app.use('/product', ProductRouter);
-app.use('/order', OrderRouter); // ✅ ganti dari /router ke /order
+app.use('/order', OrderRouter);
+app.use('/profile', ProfileRouter)
 
 // Connect DB & Start Server
 mongoose.connect('mongodb://127.0.0.1:27017/clean_kicks')
     .then(() => {
         console.log("Connected to MongoDB");
+        app.use('/uploads', express.static('uploads'));
         app.listen(process.env.PORT, () => {
             console.log(`Server is running on port ${process.env.PORT}`);
         });

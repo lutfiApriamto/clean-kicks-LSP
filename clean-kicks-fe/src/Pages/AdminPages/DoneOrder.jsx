@@ -9,62 +9,61 @@ import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 import { Link } from "react-router-dom";
 
-export default function OrderHistory() {
-  const [orders, setOrders] = useState([]);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(false);
+export default function DoneOrder () {
 
-  const fetchOrders = async () => {
-    setLoading(true);
+  const [finishedOrders, setFinisedOrders] = useState([])
+  const [currentPageFinised, setCurrentPageFinished] = useState(0)
+  const [totalPagesFinished, setTotalPagesFinised] = useState(0)
+  const [searchTermFinished, setSearchTermFinished] = useState("")
+  const [loadingFinished, setLoadingFinished] = useState(false)
+
+const fetchOrdersFinished = async () => {
+    setLoadingFinished(true);
     try {
       let response;
-      if (searchTerm) {
-        response = await axios.get(`http://localhost:3000/order/getOrderByCodeAdmin?code=${searchTerm}`);
-        setOrders(response.data.data || []);
-        setTotalPages(1);
-        setCurrentPage(0);
+      if (searchTermFinished) {
+        response = await axios.get(`http://localhost:3000/order/getOrderByCodeAdmin?code=${searchTermFinished}`);
+        setFinisedOrders(response.data.data || []);
+        setTotalPagesFinised(1);
+        setCurrentPageFinished(0);
       } else {
-        response = await axios.get(`http://localhost:3000/order/getRunningOrders?limit=10&page=${currentPage}`);
-        setOrders(response.data.data.orders || []);
-        setTotalPages(response.data.data.pagination.totalPages);
+        response = await axios.get(`http://localhost:3000/order/getFinishedOrder?limit=10&page=${currentPageFinised}`);
+        setFinisedOrders(response.data.data.orders || []);
+        setTotalPagesFinised(response.data.data.pagination.totalPages);
       }
     } catch (error) {
-      console.error("Gagal mengambil data order:", error);
-      toast.error("Gagal mengambil data order");
+      console.error("Gagal mengambil data order selesai:", error);
+      toast.error("Gagal mengambil data order selesai");
     } finally {
-      setLoading(false);
+      setLoadingFinished(false);
     }
-  };
-
-
+}
 
   useEffect(() => {
-    fetchOrders();
-  }, [currentPage, searchTerm]);
+    fetchOrdersFinished()
+  }, [currentPageFinised, searchTermFinished]);
 
-  const handleSearch = (term) => {
-    setSearchTerm(term);
+
+    const handleSearchFinished = (term) => {
+    searchTermFinished(term);
   };
 
-  const paginate = (page) => {
+    const paginateFinished = (page) => {
     setCurrentPage(page);
   };
 
-  return (
-    <>
-      <NavbarAdmin />
-
+    return (
+        <>
+        <NavbarAdmin/>
       <section className="w-full flex justify-center pt-28 px-4">
         <div className="w-full max-w-6xl">
-          <h1 className="text-3xl mb-6 text-orange-600 font-bold">Order Berjalan</h1>
+          <h1 className="text-3xl mb-6 text-orange-600 font-bold">Riwayat Order Selesai</h1>
 
           {/* Search */}
-          <SearchBarAdmin onSearch={handleSearch} />
+          <SearchBarAdmin onSearch={handleSearchFinished} />
 
           {/* Table */}
-          {loading ? (
+          {loadingFinished ? (
             <div className="text-center my-10">
               <ClipLoader color="#FFA500" size={50} />
             </div>
@@ -81,8 +80,8 @@ export default function OrderHistory() {
                   </tr>
                 </thead>
                 <tbody>
-                  {orders.length > 0 ? (
-                    orders.map((order) => (
+                  {finishedOrders.length > 0 ? (
+                    finishedOrders.map((order) => (
                       <tr key={order._id} className="hover:bg-orange-50">
                         <td className="py-2 px-4 border">{order.email}</td>
                         <td className="py-2 px-4 border">{order.notelp}</td>
@@ -93,8 +92,8 @@ export default function OrderHistory() {
                             : "Tidak tersedia"}
                         </td>
                         <td className="py-2 px-4 border text-center">
-                          <Link to={`/admin/order/progress/detail/${order._id}`} className="bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600 text-sm">
-                            Lihat Proses
+                          <Link to={`/admin/order/history/detail/${order._id}`} className="bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600 text-sm">
+                            Lihat Detail
                           </Link>
                         </td>
                       </tr>
@@ -112,18 +111,17 @@ export default function OrderHistory() {
           )}
 
           {/* Pagination */}
-          {!searchTerm && (
+          {!searchTermFinished && (
             <Pagination
-              totalPages={totalPages}
-              currentPage={currentPage}
-              paginate={paginate}
+              totalPages={totalPagesFinished}
+              currentPage={currentPageFinised}
+              paginate={paginateFinished}
               className="mt-6"
             />
           )}
         </div>
       </section>
-
       <ToastContainer position="top-center" />
-    </>
-  );
+        </>
+    )
 }

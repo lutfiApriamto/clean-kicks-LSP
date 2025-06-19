@@ -10,216 +10,219 @@ export default function OrderForm() {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [notelp, setNoTelp] = useState("");
-  const [orderType, setOrderType] = useState("");
   const [alamat, setAlamat] = useState("");
   const [detailAlamat, setDetailAlamat] = useState("");
+  const [orderList, setOrderList] = useState([
+    { namaJasa: "", harga: 0, jumlah: 1, subtotal: 0 },
+  ]);
+  const [produkList, setProdukList] = useState([]);
+  const [totalHarga, setTotalHarga] = useState(0);
+  const [totalJumlahSepatu, setTotalJumlahSepatu] = useState(0);
+  const navigate = useNavigate();
+
   const namaProses = "Order Request";
   const status = "pending";
   const adminUsername = "user Request";
   const timeStamp = new Date();
-  const [dataLenght, setDataLenght] = useState()
 
-  const navigate = useNavigate()
-  
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const codeRes = await axios.get("http://localhost:3000/order/generateCode");
+        setCode(codeRes.data.code);
 
-  // 👉 Generate kode unik 10 karakter (misal: AB12CD34EF)
-const generateCode = (length) => {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let result = "";
-  for (let i = 0; i < 10; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result + String(length).padStart(3, "0") ; 
-};
+        const produkRes = await axios.get("http://localhost:3000/product/getProducts");
+        setProdukList(produkRes.data);
+        console.log(produkRes)
+      } catch (error) {
+        console.error("Gagal memuat data awal", error);
+        toast.error("Gagal memuat data awal");
+      }
+    };
+    fetchInitialData();
+  }, []);
 
+  useEffect(() => {
+    const total = orderList.reduce(
+      (acc, item) => {
+        return {
+          jumlah: acc.jumlah + Number(item.jumlah),
+          harga: acc.harga + Number(item.subtotal),
+        };
+      },
+      { jumlah: 0, harga: 0 }
+    );
+    setTotalJumlahSepatu(total.jumlah);
+    setTotalHarga(total.harga);
+  }, [orderList]);
 
-useEffect(() => {
-  async function fetchData() {
-    try {
-      const res = await axios.get('http://localhost:3000/order/getOrders');
-      const length = res.data.data.orders.length + 1;
-      setDataLenght(length);
-
-      // Panggil generateCode setelah data length berhasil didapat
-      setCode(generateCode(length));
-    } catch (error) {
-      console.error("Gagal mengambil data produk:", error);
-      toast.error("Gagal mengambil data produk");
+  const handleOrderChange = (index, field, value) => {
+    const updatedOrders = [...orderList];
+    if (field === "namaJasa") {
+      const selected = produkList.find((p) => p.namaJasa === value);
+      updatedOrders[index][field] = value;
+      updatedOrders[index]["harga"] = selected?.harga || 0;
+      updatedOrders[index]["subtotal"] =
+        (selected?.harga || 0) * updatedOrders[index].jumlah;
+    } else if (field === "jumlah") {
+      updatedOrders[index][field] = value;
+      updatedOrders[index]["subtotal"] = updatedOrders[index].harga * value;
     }
-  }
+    setOrderList(updatedOrders);
+  };
 
-  fetchData();
-}, []);
-
+  const addOrderField = () => {
+    setOrderList([
+      ...orderList,
+      { namaJasa: "", harga: 0, jumlah: 1, subtotal: 0 },
+    ]);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-        const response = await toast.promise(
-            axios.post("http://localhost:3000/order/addOrder", {
-                name,
-                email,
-                code,
-                notelp,
-                orderType,
-                alamat,
-                detailAlamat,
-                adminUsername,
-                proses : [
-                    {
-                        namaProses,
-                        status,
-                        timeStamp,
-                        adminUsername
-                    }
-                ]
-            }),
+      const response = await toast.promise(
+        axios.post("http://localhost:3000/order/addOrder", {
+          name,
+          email,
+          code,
+          notelp,
+          orderList,
+          totalHarga,
+          totalJumlahSepatu,
+          alamat,
+          detailAlamat,
+          adminUsername,
+          proses: [
             {
+              namaProses,
+              status,
+              timeStamp,
+              adminUsername,
+            },
+          ],
+        }),
+        {
           pending: "Mengirim Permintaan...",
           success: "Order Berhasil!",
           error: "Gagal Mengirim Permintaan",
         }
-        );
-
-    setTimeout(() => {
+      );
+      setTimeout(() => {
         navigate("/tracking");
-        console.log("RESPON SERVER:", response.data);
       }, 2000);
     } catch (error) {
-        console.error("Error menambah Data Katalog", error);
-        toast.error("Terjadi kesalahan saat mengirim permintaan order");
+      toast.error("Terjadi kesalahan saat mengirim permintaan order");
     }
-    
   };
 
   return (
     <>
       <UserNavbar />
-      <section className="min-h-screen flex justify-center items-start pt-28 bg-gradient-to-b from-white to-sky-500 px-4">
-        <div className="w-full max-w-3xl bg-white rounded-xl shadow-xl p-8">
+      <section className="min-h-screen flex justify-center items-start pt-28 bg-gradient-to-b from-white to-blue-300 px-4">
+        <div className="w-full max-w-3xl bg-white rounded-2xl shadow-2xl p-10">
           <h1 className="text-3xl font-bold text-center mb-8 text-blue-900 tracking-tight">
             Form Pemesanan Clean Kicks
           </h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Nama Jasa */}
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Nama Kamu
-              </label>
-              <input
-                type="text"
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Contoh: Maman Supratman"
-                required
-                className="w-full border border-gray-300 rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-800 transition"
-              />
-            </div>
+            {/* Data Pribadi */}
+            {[{ label: "Nama Kamu", id: "name", val: name, setter: setName },
+              { label: "Email Kamu", id: "email", val: email, setter: setEmail },
+              { label: "Nomor Telepon", id: "notelp", val: notelp, setter: setNoTelp }].map((item) => (
+              <div key={item.id}>
+                <label htmlFor={item.id} className="block text-sm font-medium text-gray-700 mb-1">
+                  {item.label}
+                </label>
+                <input
+                  id={item.id}
+                  value={item.val}
+                  onChange={(e) => item.setter(e.target.value)}
+                  required
+                  className="w-full border border-gray-300 rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-800"
+                />
+              </div>
+            ))}
 
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email Kamu
-              </label>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="email@example.com"
-                required
-                className="w-full border border-gray-300 rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-800 transition"
-              />
-            </div>
+            {/* Dynamic Order List */}
+            {orderList.map((item, index) => (
+              <div key={index} className="bg-gray-50 border rounded-lg p-4 mb-4">
+                <label className="block text-sm font-semibold text-gray-800 mb-2">
+                  Pilih Layanan
+                </label>
+                <select
+                  value={item.namaJasa}
+                  onChange={(e) => handleOrderChange(index, "namaJasa", e.target.value)}
+                  required
+                  className="w-full mb-3 border border-gray-300 rounded-md py-2 px-4"
+                >
+                  <option value="">-- Pilih Layanan --</option>
+                  {produkList.map((produk) => (
+                    <option key={produk._id} value={produk.namaJasa}>
+                      {produk.namaJasa} - Rp{produk.harga.toLocaleString("id-ID")}
+                    </option>
+                  ))}
+                </select>
+                <label className="block text-sm mb-1">Jumlah Sepatu</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={item.jumlah}
+                  onChange={(e) => handleOrderChange(index, "jumlah", Number(e.target.value))}
+                  className="w-full border border-gray-300 rounded-md py-2 px-4 mb-2"
+                />
+                <p className="text-sm text-right text-gray-600 italic">
+                  Subtotal: Rp{item.subtotal.toLocaleString("id-ID")}
+                </p>
+              </div>
+            ))}
 
-            {/* Nomor Telepon */}
-            <div>
-              <label htmlFor="notelp" className="block text-sm font-medium text-gray-700 mb-1">
-                No. Telepon Kamu {"(Yang Ada WAnya yaa ...)"}
-              </label>
-              <input
-                type="tel"
-                id="notelp"
-                value={notelp}
-                onChange={(e) => setNoTelp(e.target.value)}
-                placeholder="08xxxxxxxxxx"
-                required
-                className="w-full border border-gray-300 rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-800 transition"
-              />
-            </div>
-
-            {/* Jenis Order */}
-            <div>
-              <label htmlFor="orderType" className="block text-sm font-medium text-gray-700 mb-1">
-                Tipe Order
-              </label>
-              <select
-                id="orderType"
-                value={orderType}
-                onChange={(e) => setOrderType(e.target.value)}
-                required
-                className="w-full border border-gray-300 rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-800 transition mb-2"
-              >
-                <option value="">Pilih Tipe Order</option>
-                <option value="Deep Clean">Deep Clean</option>
-                <option value="Whitening">Whitening</option>
-              </select>
-              <p>Silahkan Lihat Disini :<Link to="/catalog" className="text-blue-900 font-black italic underline">Catalog</Link></p>
+            <div className="text-right">
+              <button type="button" onClick={addOrderField} className="text-blue-800 font-semibold underline">
+                + Tambahkan Tipe Order Lainnya
+              </button>
             </div>
 
             {/* Alamat */}
+            {[{ label: "Alamat Google Maps", id: "alamat", val: alamat, setter: setAlamat },
+              { label: "Detail Alamat (opsional)", id: "detailAlamat", val: detailAlamat, setter: setDetailAlamat }].map((item) => (
+              <div key={item.id}>
+                <label htmlFor={item.id} className="block text-sm font-medium text-gray-700 mb-1">
+                  {item.label}
+                </label>
+                <textarea
+                  id={item.id}
+                  value={item.val}
+                  onChange={(e) => item.setter(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md py-2 px-4"
+                />
+              </div>
+            ))}
+
             <div>
-              <label htmlFor="alamat" className="block text-sm font-medium text-gray-700 mb-1">
-                Google Maps Rumah Kamu
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Kode Pemesanan</label>
               <input
                 type="text"
-                id="alamat"
-                value={alamat}
-                onChange={(e) => setAlamat(e.target.value)}
-                placeholder="Jl. Contoh Raya No.123"
-                required
-                className="w-full border border-gray-300 rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-800 transition"
-              />
-            </div>
-
-            {/* Detail Alamat */}
-            <div>
-              <label htmlFor="detailAlamat" className="block text-sm font-medium text-gray-700 mb-1">
-                Detail Alamat (Opsional)
-              </label>
-              <textarea
-                id="detailAlamat"
-                value={detailAlamat}
-                onChange={(e) => setDetailAlamat(e.target.value)}
-                placeholder="Patokan, lantai, dsb."
-                rows="3"
-                className="w-full border border-gray-300 rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-800 transition"
-              />
-            </div>
-
-            {/* Kode Pesanan */}
-            <div>
-              <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-1">
-                Kode Pemesanan
-              </label>
-              <input
-                type="text"
-                id="code"
                 value={code}
                 disabled
-                className="w-full bg-gray-100 border border-gray-300 rounded-md py-3 px-4 text-gray-600 cursor-not-allowed"
+                className="w-full bg-gray-100 border border-gray-300 rounded-md py-3 px-4 text-gray-600"
               />
             </div>
 
-            {/* Submit */}
+            {/* Total Harga dan Submit */}
+            <div className="mt-4 p-4 rounded-lg bg-blue-50 border border-blue-200">
+              <p className="text-blue-900 font-semibold">
+                Total Sepatu: {totalJumlahSepatu} pasang
+              </p>
+              <p className="text-blue-900 font-semibold">
+                Total Harga: Rp{totalHarga.toLocaleString("id-ID")}
+              </p>
+            </div>
+
             <div className="text-center pt-4">
               <button
                 type="submit"
-                className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 px-10 rounded-full transition duration-300 shadow-md"
+                className="bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 px-10 rounded-full transition duration-300 shadow-md"
               >
                 Kirim Pesanan
               </button>

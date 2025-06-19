@@ -12,6 +12,8 @@ export default function EditCatalog() {
   const [namaJasa, setNamaJasa] = useState("");
   const [harga, setHarga] = useState("");
   const [description, setDescription] = useState("");
+  const [images, setImages] = useState([]);
+  const [uploading, setUploading] = useState(false);
 
   // Fetch data product saat halaman dibuka
   useEffect(() => {
@@ -22,6 +24,8 @@ export default function EditCatalog() {
         setNamaJasa(product.namaJasa);
         setHarga(product.harga);
         setDescription(product.description);
+        setImages(product.images)
+        console.log(res)
       } catch (error) {
         console.error("Gagal mengambil data produk:", error);
         toast.error("Gagal mengambil data produk");
@@ -33,6 +37,8 @@ export default function EditCatalog() {
 
   // Handle submit update
   const handleUpdate = async (e) => {
+    const confirmUpdate = window.confirm("Data Yang Anda Masukan Sudah Benar?");
+    if (!confirmUpdate) return;
     e.preventDefault();
 
     try {
@@ -41,6 +47,7 @@ export default function EditCatalog() {
           namaJasa,
           harga: parseInt(harga),
           description,
+          images,
         }),
         {
           pending: "Mengupdate data...",
@@ -55,6 +62,55 @@ export default function EditCatalog() {
     } catch (error) {
       console.error("Error update data:", error);
       toast.error("Terjadi kesalahan saat update");
+    }
+  };
+
+  // Upload gambar secara langsung
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validasi file
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      toast.error("Format gambar tidak didukung");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Ukuran gambar maksimal 2MB");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      setUploading(true);
+      const res = await axios.post("http://localhost:3000/product/uploadImage", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      setImages((prev) => [...prev, res.data.imageUrl]);
+      toast.success("Gambar berhasil diunggah");
+    } catch (err) {
+      console.error("Upload gagal:", err);
+      toast.error("Gagal mengunggah gambar");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+    // Hapus gambar
+  const handleDeleteImage = async (url) => {
+    const confirmDelete = window.confirm("Apakah Anda yakin ingin menghapus produk ini?");
+    if (!confirmDelete) return;
+    const filename = encodeURIComponent(url.split("/").pop());
+    try {
+      await axios.delete(`http://localhost:3000/product/deleteImage?filename=${filename}`);
+      setImages((prev) => prev.filter((img) => img !== url));
+      toast.info("Gambar berhasil dihapus");
+    } catch (err) {
+      console.error("Gagal hapus gambar", err);
+      toast.error("Gagal menghapus gambar");
     }
   };
 
@@ -111,6 +167,37 @@ export default function EditCatalog() {
                 className="w-full border border-gray-300 rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-400 resize-none"
               ></textarea>
             </div>
+
+            <div>
+              <label className="block font-semibold mb-2">Upload Gambar</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={uploading}
+                className="mb-4"
+              />
+              <div className="flex flex-wrap gap-4">
+                {images.map((url, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={url}
+                      alt={`preview-${index}`}
+                      className="w-32 h-32 object-cover rounded-lg border shadow-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteImage(url)}
+                      className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full w-6 h-6 text-xs"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+
 
             <div className="text-center">
               <button

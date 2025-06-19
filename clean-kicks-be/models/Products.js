@@ -6,6 +6,7 @@ const ProductSchema = new mongoose.Schema({
   timeStamp: { type: Date, default: Date.now, required: true },
   adminUsername: { type: String, required: true },
   description: { type: String, required: true },
+  images: [{ type: String, required: true }]
 });
 
 const ProductModel = mongoose.model("Product", ProductSchema);

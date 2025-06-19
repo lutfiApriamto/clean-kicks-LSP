@@ -37,9 +37,11 @@ export default function NavbarAdmin () {
         <>
         <header className="p-5 w-full bg-orange-400 flex justify-center items-center fixed">
             <div className="w-2/3  flex justify-around items-center">
-                <Link className="text-xl font-bold text-white hover:text-blue-800"  to="/admin/dashboard">Beranda</Link>
-                <Link className="text-xl font-bold text-white hover:text-blue-800"  to="/admin/catalog">Catalog Jasa</Link>
-                <Link className="text-xl font-bold text-white hover:text-blue-800" to="/admin/order/history">Riwayat Order</Link>
+                <Link className=" font-bold text-white hover:text-blue-800"  to="/admin/dashboard">Beranda</Link>
+                <Link className=" font-bold text-white hover:text-blue-800"  to="/admin/catalog">Catalog Jasa</Link>
+                <Link className=" font-bold text-white hover:text-blue-800" to="/admin/order/running">Order Berjalan</Link>
+                <Link className=" font-bold text-white hover:text-blue-800" to="/admin/order/done">Order Selesai</Link>
+                <Link className=" font-bold text-white hover:text-blue-800" to="/admin/profile/add">Add New Profile</Link>
                 <button onClick={handleLogOut} className="py-2 px-5 bg-red-700 text-white rounded-2xl">Logout</button>
             </div>
         </header>

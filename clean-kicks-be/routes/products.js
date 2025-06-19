@@ -1,6 +1,9 @@
 import express from 'express'
 import { Product } from "../models/Products.js";
 import dotenv from 'dotenv'
+import upload from "../middleware/upload.js"; // import multer config
+import fs from 'fs';
+import path from 'path';
 
 dotenv.config()
 
@@ -14,6 +17,37 @@ router.get("/getProducts", async (req, res) => {
     } catch (error) {
         console.log(error)
         return res.status(400).json({message : "Terjadi Kesalahan Saat Loading"})
+    }
+})
+
+
+router.get('/getProductsAdmin', async (req,res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10;
+        const page = parseInt(req.query.page) || 0;
+        const skip = page * limit;
+
+        const total = await Product.countDocuments();
+
+        const products = await Product.find()
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({
+            data: {
+                pagination: {
+                    total,
+                    limit,
+                    page,
+                    totalPages: Math.ceil(total / limit)
+                },
+                products
+            }
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Terjadi kesalahan saat memuat semua order" });
     }
 })
 
@@ -38,7 +72,7 @@ router.post('/addProduct', async (req, res) => {
         console.log(error)
         return res.status(400).json({message : "Terjadi Kesalahan Saat Menambah Product"})
     }
-})
+});
 
 // Route Edit Product
 router.patch('/:id/updateProduct', async (req, res) => {
@@ -54,12 +88,40 @@ router.patch('/:id/updateProduct', async (req, res) => {
 router.delete('/:id/deleteProduct', async (req, res) => {
     try {
         const deleteProduct = await Product.deleteOne({_id:req.params.id})
-        res.status(201).json({message : "berhasil MMenghapus Product"}, deleteProduct)
+        res.status(200).json({ message: "Berhasil menghapus product", deleteProduct });
     } catch (error) {
         console.log(error)
        return res.status(404).json({message : "Gagal Menghapus Product", error})
     }
 })
+
+router.post('/uploadImage', upload.single('image'), async (req, res) => {
+    try {
+        const filePath = req.file.path.replace(/\\/g, '/'); // untuk Windows
+        res.status(200).json({ imageUrl: `http://localhost:${process.env.PORT}/${filePath}` });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Gagal mengupload gambar" });
+    }
+});
+
+router.delete('/deleteImage', async (req, res) => {
+    try {
+        const { filename } = req.query;
+        if (!filename) return res.status(400).json({ message: "Nama file tidak ditemukan" });
+
+        const filePath = path.join('uploads', filename);
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+            return res.status(200).json({ message: "Gambar berhasil dihapus" });
+        } else {
+            return res.status(404).json({ message: "File tidak ditemukan" });
+        }
+    } catch (error) {
+        console.error("Gagal menghapus gambar:", error);
+        res.status(500).json({ message: "Gagal menghapus gambar" });
+    }
+});
 
 
 export {router as ProductRouter}
