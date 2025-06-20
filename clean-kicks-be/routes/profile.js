@@ -58,4 +58,14 @@ router.patch("/:id/updateProfile", async (req,res) => {
     }
 })
 
+router.delete('/:id/deleteProfile', async (req, res) => {
+    try {
+        const deleteProfile = await Profile.deleteOne({_id:req.params.id})
+        res.status(200).json({message: "Berhasil Menghapus Product"})
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({message : "Terjadi Kesahalan Saat Menghapus Profile"})
+    }
+})
+
 export {router as ProfileRouter}

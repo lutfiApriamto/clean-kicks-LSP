@@ -31,7 +31,8 @@ app.use('/order', OrderRouter);
 app.use('/profile', ProfileRouter)
 
 // Connect DB & Start Server
-mongoose.connect('mongodb://127.0.0.1:27017/clean_kicks')
+// mongoose.connect('mongodb://127.0.0.1:27017/clean_kicks')
+mongoose.connect('mongodb+srv://lutfiapriamto12:Sugali213.@cluster0.egvggfx.mongodb.net/clean_kicks?retryWrites=true&w=majority&appName=Cluster0')
     .then(() => {
         console.log("Connected to MongoDB");
         app.use('/uploads', express.static('uploads'));
