@@ -16,6 +16,7 @@ import AddProfile from "./Pages/AdminPages/AddProfile.jsx";
 import DoneOrder from "./Pages/AdminPages/DoneOrder.jsx";
 import EditProfileCompany from "./Pages/AdminPages/EditProfileCompany.jsx";
 import DetailProductUser from "./Pages/UserPages/DetailProductUser.jsx";
+import RegisterPageAdmin from "./Pages/AdminPages/RegisterPageAdmin.jsx";
 
 function App() {
   return(
@@ -27,7 +28,7 @@ function App() {
         <Route path="/tracking" element={<TrackingOrderPage/>}/>
         <Route path="/catalog/detail/:id" element={<DetailProductUser/>}/>
 
-        
+        <Route path="/admin/register" element={<RegisterPageAdmin/>}/>
         <Route path="/admin/dashboard" element={<Dashboard/>}/>
         <Route path="/admin/catalog" element={<Catalog />} />
         <Route path="/admin/catalog/addcatalog" element={<AddCatalog/>}/>
