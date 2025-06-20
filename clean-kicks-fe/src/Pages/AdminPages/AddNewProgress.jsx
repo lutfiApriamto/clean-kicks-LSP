@@ -71,7 +71,7 @@ const handleSubmit = async (e) => {
             {/* Jenis Order */}
             <div>
               <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                Tipe Order
+                Status Order
               </label>
               <select
                 id="status"
@@ -80,7 +80,7 @@ const handleSubmit = async (e) => {
                 onChange={(e) => setStatus(e.target.value)}
                 className="w-full border border-gray-300 rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-800 transition mb-2"
               >
-                <option value="">Pilih Tipe Order</option>
+                <option value="">Pilih Status Order</option>
                 <option value="MENERIMA ORDER">MENERIMA ORDER</option>
                 <option value="OTW JEMPUT">OTW JEMPUT</option>
                 <option value="OTW RUMAH">OTW RUMAH</option>

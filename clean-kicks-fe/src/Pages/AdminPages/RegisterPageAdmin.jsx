@@ -19,8 +19,8 @@ export default function RegisterPageAdmin () {
       const response = await toast.promise(
         axios.post('http://localhost:3000/admin/registerAdmin', { username, password, role }),
         {
-          pending: 'Logging in...',
-          success: 'Berhasil Login!',
+          pending: 'Register...',
+          success: 'Berhasil Mendaftarkan Admin!',
           error: 'Failed to log in',
         }
       );

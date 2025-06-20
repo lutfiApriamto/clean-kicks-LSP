@@ -44,13 +44,15 @@ const fetchOrdersFinished = async () => {
   }, [currentPageFinised, searchTermFinished]);
 
 
-    const handleSearchFinished = (term) => {
-    searchTermFinished(term);
+  const handleSearchFinished = (term) => {
+    setSearchTermFinished(term);
   };
 
-    const paginateFinished = (page) => {
-    setCurrentPage(page);
+
+  const paginateFinished = (page) => {
+    setCurrentPageFinished(page); // ✅
   };
+
 
     return (
         <>

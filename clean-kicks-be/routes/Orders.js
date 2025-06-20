@@ -2,6 +2,7 @@ import express from 'express'
 import dotenv from 'dotenv'
 import { Order } from '../models/Orders.js'
 import { createObjectCsvStringifier } from 'csv-writer';
+import nodemailer from 'nodemailer'
 
 dotenv.config()
 
@@ -254,13 +255,46 @@ router.post('/addOrder', async (req, res) => {
       proses
     });
 
+    // Simpan order ke DB dulu
     const savedOrder = await newOrder.save();
-    res.status(200).json(savedOrder);
+
+    // Kirim email setelah berhasil simpan
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Kode Pemesanan Sepatu Clean Kicks',
+      text: `Terima kasih atas pemesanannya, ${name}. Kode pemesanan sepatu Anda adalah: ${code}. Silakan salin kode ini untuk tracking pemesanan Anda.`
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.error("Email gagal dikirim:", error);
+        return res.status(200).json({
+          message: "Order berhasil disimpan, tapi gagal mengirim email.",
+          order: savedOrder
+        });
+      } else {
+        return res.status(200).json({
+          message: "Order berhasil disimpan dan email terkirim!",
+          order: savedOrder
+        });
+      }
+    });
+
   } catch (error) {
     console.error(error);
     res.status(400).json({ message: "Gagal Membuat Order" });
   }
 });
+
 
 
 router.post('/:id/addNewProggresOrder', async (req, res) => {

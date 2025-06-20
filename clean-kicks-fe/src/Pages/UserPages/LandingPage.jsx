@@ -1,5 +1,8 @@
 import { Link } from "react-router-dom";
 import UserNavbar from "../../Components/PublicComponents/UserNavbar";
+import bgUtama1 from "@/assets/img/bg-utama-1.jpg"; 
+import bgUtama2 from "@/assets/img/bg-utama-2.jpg"; 
+import bgUtama3 from "@/assets/img/bg-utama-3.jpg"; 
 
 export default function LandingPage() {
   return (
@@ -20,15 +23,19 @@ export default function LandingPage() {
             <Link to="order" className="bg-blue-800 text-white px-6 py-3 rounded-md font-medium hover:bg-blue-700 transition">
               Pesan Sekarang
             </Link>
-            <Link to="#" className="border border-blue-800 text-blue-800 px-6 py-3 rounded-md font-medium hover:bg-blue-50 transition">
+            <Link to="/catalog" className="border border-blue-800 text-blue-800 px-6 py-3 rounded-md font-medium hover:bg-blue-50 transition">
               Lihat Katalog
             </Link>
           </div>
         </div>
         <div className="lg:w-1/2 flex justify-center">
-          <div className="w-full h-72 sm:h-96 bg-gray-300 rounded-xl shadow-inner flex items-center justify-center text-gray-500 text-lg">
-            Gambar Ilustrasi
-          </div>
+<div className="w-full h-72 sm:h-96 rounded-xl shadow-inner overflow-hidden">
+  <img
+    src={bgUtama1}
+    alt="Ilustrasi sepatu"
+    className="w-full h-full object-cover"
+  />
+</div>
         </div>
       </section>
 
@@ -46,22 +53,22 @@ export default function LandingPage() {
     </p>
   </div>
   <div className="lg:w-1/2 order-1 lg:order-2 flex justify-center">
-    <img
-      src="/images/qilap-clean.png" // ganti dengan path gambar kamu, contoh: public folder
-      alt="Sepatu kotor dibersihkan"
-      className="rounded-full w-[300px] sm:w-[400px] lg:w-[480px] object-cover"
-    />
+<img
+  src={bgUtama2}
+  alt="Sepatu kotor dibersihkan"
+  className="rounded-full w-[300px] sm:w-[400px] lg:w-[480px] object-cover"
+/>
   </div>
 </section>
 
 {/* Highlight: from head to SEPATOE */}
 <section className="bg-gray-100 py-20 px-6 sm:px-10 flex flex-col-reverse lg:flex-row items-center gap-10">
   <div className="lg:w-1/2 flex justify-center">
-    <img
-      src="/images/qilap-white-shoes.png" // ganti sesuai path kamu
-      alt="Memakai sepatu putih"
-      className="rounded-full w-[300px] sm:w-[400px] lg:w-[480px] object-cover"
-    />
+<img
+  src={bgUtama3}
+  alt="Memakai sepatu putih"
+  className="rounded-full w-[300px] sm:w-[400px] lg:w-[480px] object-cover"
+/>
   </div>
   <div className="lg:w-1/2 text-center lg:text-left">
     <p className="text-teal-600 font-semibold mb-2">/SE·PA·TU/</p>
